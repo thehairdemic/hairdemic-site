@@ -1273,6 +1273,19 @@ button,input{font:inherit}
 .v25-pipeline p{color:#6b7076;font-size:12px;line-height:1.45}
 @media(max-width:980px){.v25-dashboard{grid-template-columns:1fr 1fr}.v25-registry-grid{grid-template-columns:1fr}.v25-pipeline{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.v25-dashboard,.v25-pipeline{grid-template-columns:1fr}.v25-map-panel,.v25-standards{padding:24px 20px}.v25-map-head{display:grid}}
+</style><style id="v26-live-stats-style">
+.v26-live-note{
+  margin-top:10px;
+  color:#73787e;
+  font-size:11px;
+  font-weight:800;
+}
+.v26-live-note.is-live{
+  color:var(--green);
+}
+.v26-live-note.has-error{
+  color:#a51635;
+}
 </style></head>
 <body>
 <nav class="nav">
@@ -1284,7 +1297,7 @@ button,input{font:inherit}
 <a href="#findings">Findings</a>
 <a href="#what">Institute</a>
 <a href="#playbook">Playbook</a>
-<a href="Hairdemic_Submit_Case.html">Submit a Case</a>
+<a href="Hairdemic_Submit_Case_v25_Verified.html">Submit a Case</a>
 <button class="nav-cta" onclick="document.getElementById('founding-member').scrollIntoView({behavior:'smooth'})">Join Hairdemic</button>
 </div>
 </nav>
@@ -1295,7 +1308,7 @@ button,input{font:inherit}
 <a href="#findings"><i></i> RESEARCH ACTIVE</a>
 <a href="#findings">6 PUBLISHED FINDINGS</a>
 <a href="#playbook">1 PUBLIC TOOL AVAILABLE</a>
-<a class="registry-live" href="Hairdemic_Submit_Case.html">CASE REGISTRY OPEN — SUBMIT A CASE</a>
+<a class="registry-live" href="Hairdemic_Submit_Case_v25_Verified.html">CASE REGISTRY OPEN — SUBMIT A CASE</a>
 <a href="#explore-institute">HAIRDEMIC MAP OPEN NOW</a>
 </div>
 <div aria-hidden="true" class="v22-status-group">
@@ -1303,7 +1316,7 @@ button,input{font:inherit}
 <a href="#findings"><i></i> RESEARCH ACTIVE</a>
 <a href="#findings">6 PUBLISHED FINDINGS</a>
 <a href="#playbook">1 PUBLIC TOOL AVAILABLE</a>
-<a class="registry-live" href="Hairdemic_Submit_Case.html">CASE REGISTRY OPEN — SUBMIT A CASE</a>
+<a class="registry-live" href="Hairdemic_Submit_Case_v25_Verified.html">CASE REGISTRY OPEN — SUBMIT A CASE</a>
 <a href="#explore-institute">HAIRDEMIC MAP OPEN NOW</a>
 </div>
 </div>
@@ -1317,7 +1330,7 @@ button,input{font:inherit}
 <div class="hero-actions">
 <a class="btn dark" href="#findings">Explore Findings</a>
 <a class="btn light" href="#playbook">Access the Playbook</a>
-<a class="btn light v22-case-cta" href="Hairdemic_Submit_Case.html">Submit a Case</a></div>
+<a class="btn light v22-case-cta" href="Hairdemic_Submit_Case_v25_Verified.html">Submit a Case</a></div>
 </div>
 <div aria-hidden="true" class="v19-hero-cell-wrap">
 <div class="v19-orbit orbit-one"></div>
@@ -1515,6 +1528,63 @@ document.addEventListener("DOMContentLoaded", () => {
     form.classList.remove("is-submitted");
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   });
+});
+</script><script id="v26-live-stats-script">
+document.addEventListener("DOMContentLoaded", async () => {
+  const SUPABASE_URL = "https://tssjvkddmimqtyjiuyel.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2p2a2RkbWltcXR5aml1eWVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5ODI3NTIsImV4cCI6MjA5OTU1ODc1Mn0.gFd1VmeYvmR66mw4ZdMOjNc1bnawZILGAZ9GQrcjRh8";
+
+  const verified = document.getElementById("verifiedCases");
+  const pending = document.getElementById("pendingCases");
+  const states = document.getElementById("statesRepresented");
+  const note = document.getElementById("registryStatsNote");
+  const mapVerified = document.getElementById("mapVerifiedCases");
+  const mapPlural = document.getElementById("mapCasePlural");
+
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/get_registry_stats`,
+      {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Content-Profile": "public",
+          "Accept-Profile": "public"
+        },
+        body: JSON.stringify({})
+      }
+    );
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(details || `Stats request failed (${response.status}).`);
+    }
+
+    const data = await response.json();
+    const stats = Array.isArray(data) ? data[0] : data;
+
+    const verifiedCount = Number(stats?.verified_cases || 0);
+    const pendingCount = Number(stats?.pending_cases || 0);
+    const stateCount = Number(stats?.states_represented || 0);
+
+    verified.textContent = verifiedCount.toLocaleString();
+    pending.textContent = pendingCount.toLocaleString();
+    states.textContent = stateCount.toLocaleString();
+    mapVerified.textContent = verifiedCount.toLocaleString();
+    mapPlural.textContent = verifiedCount === 1 ? "" : "s";
+
+    note.textContent = "Live totals from the Hairdemic Case Registry.";
+    note.classList.add("is-live");
+  } catch (error) {
+    console.error("Hairdemic registry statistics error:", error);
+    verified.textContent = "—";
+    pending.textContent = "—";
+    states.textContent = "—";
+    note.textContent = "Live registry totals are temporarily unavailable.";
+    note.classList.add("has-error");
+  }
 });
 </script></body>
 </html>
