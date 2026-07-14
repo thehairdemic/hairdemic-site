@@ -104,6 +104,20 @@ input,select,textarea{width:100%;padding:15px 16px;border:1px solid var(--line);
 .v25-submit-standards{margin-top:24px;padding:24px;border:1px solid var(--line);background:var(--white)}
 .v25-submit-standards>div{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.v25-submit-standards span{padding:9px 11px;border:1px solid var(--line);border-radius:999px;font-size:11px;font-weight:850}
 @media(max-width:820px){.v25-submit-preview-grid{grid-template-columns:1fr}.v25-submit-status{display:grid}}
+</style><style id="database-connected-style">
+.submission-error{
+  display:block;
+  min-height:0;
+  margin-top:18px;
+  color:#a51635;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.45;
+}
+.submit:disabled{
+  cursor:wait;
+  opacity:.62;
+}
 </style></head>
 <body>
 <nav class="nav">
@@ -172,33 +186,33 @@ input,select,textarea{width:100%;padding:15px 16px;border:1px solid var(--line);
 <div class="badge">REGISTRY OPEN</div>
 </div>
 <div class="grid">
-<label><span>Your role</span><select required=""><option value="">Select your role</option><option>Client</option><option>Hairstylist</option><option>Barber</option><option>Parent or guardian</option><option>Salon owner</option><option>Other</option></select></label>
-<label><span>City and state</span><input placeholder="Chicago, IL" required="" type="text"/></label>
-<label><span>Appointment or experience date</span><input type="date"/></label>
-<label><span>Was the concern resolved?</span><select required=""><option value="">Choose one</option><option>Yes</option><option>Partly</option><option>No</option><option>Not applicable</option></select></label>
+<label><span>Your role</span><select id="role" name="role" required=""><option value="">Select your role</option><option>Client</option><option>Hairstylist</option><option>Barber</option><option>Parent or guardian</option><option>Salon owner</option><option>Other</option></select></label>
+<label><span>City and state</span><input id="location" name="location" placeholder="Chicago, IL" required="" type="text"/></label>
+<label><span>Appointment or experience date</span><input id="experience_date" name="experience_date" type="date"/></label>
+<label><span>Was the concern resolved?</span><select id="resolved" name="resolved" required=""><option value="">Choose one</option><option>Yes</option><option>Partly</option><option>No</option><option>Not applicable</option></select></label>
 <label class="full">
 <span>What type of experience are you reporting?</span>
 <div class="categories">
-<label><input name="category" type="checkbox"/><span>Pricing</span></label>
-<label><input name="category" type="checkbox"/><span>Communication</span></label>
-<label><input name="category" type="checkbox"/><span>Service expectations</span></label>
-<label><input name="category" type="checkbox"/><span>Hair-care outcome</span></label>
-<label><input name="category" type="checkbox"/><span>Policies or booking</span></label>
-<label><input name="category" type="checkbox"/><span>Access or affordability</span></label>
-<label><input name="category" type="checkbox"/><span>Community or trust</span></label>
-<label><input name="category" type="checkbox"/><span>Other</span></label>
+<label><input name="category" type="checkbox" value="Pricing"/><span>Pricing</span></label>
+<label><input name="category" type="checkbox" value="Communication"/><span>Communication</span></label>
+<label><input name="category" type="checkbox" value="Service expectations"/><span>Service expectations</span></label>
+<label><input name="category" type="checkbox" value="Hair-care outcome"/><span>Hair-care outcome</span></label>
+<label><input name="category" type="checkbox" value="Policies or booking"/><span>Policies or booking</span></label>
+<label><input name="category" type="checkbox" value="Access or affordability"/><span>Access or affordability</span></label>
+<label><input name="category" type="checkbox" value="Community or trust"/><span>Community or trust</span></label>
+<label><input name="category" type="checkbox" value="Other"/><span>Other</span></label>
 </div>
 </label>
-<label class="full"><span>What happened?</span><textarea placeholder="Describe the experience without including identifying names." required="" rows="7"></textarea></label>
-<label class="full"><span>What do you think this experience shows about today’s hair industry?</span><textarea placeholder="Optional: Describe the larger issue or pattern you noticed." rows="4"></textarea></label>
-<label><span>May Hairdemic use this anonymously in future findings?</span><select required=""><option value="">Choose one</option><option>Yes</option><option>No</option></select></label>
-<label><span>Email for follow-up</span><input placeholder="Optional" type="email"/></label>
+<label class="full"><span>What happened?</span><textarea id="story" name="story" placeholder="Describe the experience without including identifying names." required="" rows="7"></textarea></label>
+<label class="full"><span>What do you think this experience shows about today’s hair industry?</span><textarea id="industry_meaning" name="industry_meaning" placeholder="Optional: Describe the larger issue or pattern you noticed." rows="4"></textarea></label>
+<label><span>May Hairdemic use this anonymously in future findings?</span><select id="anonymous_permission" name="anonymous_permission" required=""><option value="">Choose one</option><option>Yes</option><option>No</option></select></label>
+<label><span>Email for follow-up</span><input id="email" name="email" placeholder="Optional" type="email"/></label>
 </div>
 <div class="consent">
-<label><input required="" type="checkbox"/><span>I confirm that I did not include identifying names and understand that this prototype does not permanently store submissions yet.</span></label>
+<label><input required="" type="checkbox"/><span>I confirm that I did not include identifying names and understand that my submission will be stored privately for Hairdemic review.</span></label>
 </div>
-<button class="submit" type="submit">Add Case to Registry</button>
-<p class="note">This prototype demonstrates the complete submission experience. Permanent storage requires connecting the form to a live database or form service.</p>
+<div aria-live="assertive" class="submission-error" id="submissionError" role="alert"></div><button class="submit" id="submitCaseButton" type="submit">Add Case to Registry</button>
+<p class="note">Submissions are stored privately in the Hairdemic Case Registry. They do not appear publicly until reviewed and verified.</p>
 <div aria-live="polite" class="success">
 <div class="cell">HD</div>
 <small>CASE ADDED TO THE REGISTRY</small>
@@ -209,29 +223,106 @@ input,select,textarea{width:100%;padding:15px 16px;border:1px solid var(--line);
 </div>
 </form>
 </main>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("caseForm");
-  const id = form.querySelector(".case-id span");
-  const again = form.querySelector(".again");
+  const SUPABASE_URL = "https://tssjvkddmimqtyjiuyel.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2p2a2RkbWltcXR5aml1eWVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5ODI3NTIsImV4cCI6MjA5OTU1ODc1Mn0.gFd1VmeYvmR66mw4ZdMOjNc1bnawZILGAZ9GQrcjRh8";
 
-  form.addEventListener("submit", (event) => {
+  const form = document.getElementById("caseForm");
+  const submitButton = document.getElementById("submitCaseButton");
+  const errorBox = document.getElementById("submissionError");
+  const caseIdElement = form.querySelector(".case-id span");
+  const submitAnother = form.querySelector(".again");
+
+  function splitLocation(value) {
+    const cleaned = value.trim();
+    const commaIndex = cleaned.lastIndexOf(",");
+    if (commaIndex === -1) {
+      return { city: cleaned, state: "" };
+    }
+    return {
+      city: cleaned.slice(0, commaIndex).trim(),
+      state: cleaned.slice(commaIndex + 1).trim()
+    };
+  }
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!form.querySelectorAll('input[name="category"]:checked').length) {
-      alert("Please select at least one type of experience.");
+    errorBox.textContent = "";
+
+    const categories = Array.from(
+      form.querySelectorAll('input[name="category"]:checked')
+    ).map(input => input.value);
+
+    if (!categories.length) {
+      errorBox.textContent = "Please select at least one type of experience.";
       return;
     }
-    id.textContent = "HD-" + new Date().getFullYear() + "-" + Math.floor(100000 + Math.random() * 900000);
-    form.classList.add("submitted");
-    form.querySelector(".success").scrollIntoView({behavior:"smooth",block:"center"});
+
+    const location = splitLocation(document.getElementById("location").value);
+    const permissionValue = document.getElementById("anonymous_permission").value;
+
+    const caseData = {
+      role: document.getElementById("role").value,
+      city: location.city,
+      state: location.state,
+      experience_date: document.getElementById("experience_date").value || null,
+      categories: categories.join(", "),
+      story: document.getElementById("story").value.trim(),
+      industry_meaning: document.getElementById("industry_meaning").value.trim() || null,
+      resolved: document.getElementById("resolved").value,
+      anonymous_permission: permissionValue === "Yes",
+      email: document.getElementById("email").value.trim() || null,
+      status: "pending"
+    };
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Adding Case...";
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/cases`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify(caseData)
+      });
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(details || `Submission failed (${response.status}).`);
+      }
+
+      const generatedCaseId =
+        "HD-" + new Date().getFullYear() + "-" +
+        Math.floor(100000 + Math.random() * 900000);
+
+      caseIdElement.textContent = generatedCaseId;
+      form.classList.add("submitted");
+      form.querySelector(".success").scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    } catch (error) {
+      console.error("Hairdemic case submission error:", error);
+      errorBox.textContent =
+        "Your case could not be saved. Please check your connection and try again.";
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Add Case to Registry";
+    }
   });
 
-  again.addEventListener("click", () => {
+  submitAnother.addEventListener("click", () => {
     form.reset();
     form.classList.remove("submitted");
-    window.scrollTo({top:0,behavior:"smooth"});
+    errorBox.textContent = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 });
-</script>
-</body>
+</script></body>
 </html>
