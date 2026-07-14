@@ -287,6 +287,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "apikey": SUPABASE_ANON_KEY,
           "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           "Content-Type": "application/json",
+          "Content-Profile": "public",
+          "Accept-Profile": "public",
           "Prefer": "return=minimal"
         },
         body: JSON.stringify(caseData)
