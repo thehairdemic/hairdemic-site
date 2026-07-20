@@ -1,0 +1,39 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  min-height:100%;
+  background:#05070c;
+  color:white;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow-x:hidden;
+}
+
+body{
+  background:
+    radial-gradient(circle at top,#1d2045 0%,#0b0d18 35%,#05070c 100%);
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  transition:.35s;
+}
+
+button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(255,255,255,.15);
+}
+
+::selection{
+  background:#ff4ea8;
+  color:white;
+}
